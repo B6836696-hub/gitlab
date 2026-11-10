@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>BJT Common-Emitter DC Bias</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<main>
+  <header>
+    <h1>BJT Common-Emitter DC Bias</h1>
+    <p>คำนวณจุดทำงาน DC ของทรานซิสเตอร์ NPN แบบ voltage-divider bias</p>
+  </header>
+
+  <section class="card">
+    <h2>ค่าอินพุต</h2>
+    <form method="post" action="/">
+      <div class="grid">
+        {% set fields = [
+          ("vcc", "VCC", "แรงดันไฟเลี้ยง", "V"),
+          ("r1", "R1", "ตัวต้านทานฐานตัวบน", "Ω"),
+          ("r2", "R2", "ตัวต้านทานฐานตัวล่าง", "Ω"),
+          ("rc", "RC", "ตัวต้านทานคอลเลกเตอร์", "Ω"),
+          ("re", "RE", "ตัวต้านทานอิมิตเตอร์", "Ω"),
+          ("beta", "β", "อัตราขยายกระแส (hFE)", ""),
+          ("vbe", "VBE", "แรงดันฐาน-อิมิตเตอร์", "V")
+        ] %}
+        {% for name, symbol, label, unit in fields %}
+        <label class="field">
+          <span>{{ label }} <strong>{{ symbol }}</strong>{% if unit %} ({{ unit }}){% endif %}</span>
+          <input type="number" name="{{ name }}" step="any" required value="{{ values[name] }}">
+          {% if errors.get(name) %}<span class="error">{{ errors[name] }}</span>{% endif %}
+        </label>
+        {% endfor %}
+      </div>
+      <button type="submit">คำนวณ</button>
+    </form>
+  </section>
+
+  {% if result %}
+  <section class="card" id="results">
+    <div class="result-head">
+      <h2>จุดทำงาน DC</h2>
+      <span class="badge badge-{{ result.region }}">{{ result.region|capitalize }}</span>
+    </div>
+
+    {% if result.region == "active" %}
+    <p class="note ok">ทรานซิสเตอร์อยู่ในย่าน Active — สมการ DC ใช้งานได้ตามปกติ</p>
+    {% elif result.region == "cutoff" %}
+    <p class="note warn">Cutoff — ไบแอสฐาน-อิมิตเตอร์ไม่ forward bias กระแสจึงประมาณเป็นศูนย์</p>
+    {% else %}
+    <p class="note warn">Saturation — ค่า VCE ต่ำกว่า VCE(sat) สมการ active-region ไม่ใช้ได้จริง ค่าที่แสดงเป็นการประมาณเท่านั้น</p>
+    {% endif %}
+
+    <table>
+      <thead>
+        <tr><th>ปริมาณ</th><th>ค่า</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>VBB</td><td>{{ result.vbb_v|voltage }}</td></tr>
+        <tr><td>RB</td><td>{{ result.rb_ohm|round(4) }} Ω</td></tr>
+        <tr><td>IB</td><td>{{ result.ib_a|current }}</td></tr>
+        <tr><td>IC</td><td>{{ result.ic_a|current }}</td></tr>
+        <tr><td>IE</td><td>{{ result.ie_a|current }}</td></tr>
+        <tr><td>VE</td><td>{{ result.ve_v|voltage }}</td></tr>
+        <tr><td>VB</td><td>{{ result.vb_v|voltage }}</td></tr>
+        <tr><td>VC</td><td>{{ result.vc_v|voltage }}</td></tr>
+        <tr><td>VCE</td><td>{{ result.vce_v|voltage }}</td></tr>
+        {% if result.region == "saturation" %}
+        <tr><td>IC(sat)</td><td>{{ result.ic_sat_a|current }}</td></tr>
+        {% endif %}
+      </tbody>
+    </table>
+
+    <h2>ตรวจสอบด้วยการคำนวณอิสระ (Nodal Analysis)</h2>
+    <p class="status {{ 'ok' if comparison.matched else 'bad' }}">
+      {{ 'MATCH' if comparison.matched else 'MISMATCH' }}
+      <span>ผลต่างสัมพัทธ์สูงสุด {{ "%.2e"|format(comparison.max_rel_diff) }}</span>
+    </p>
+    <div class="table-scroll">
+      <table>
+        <thead>
+          <tr>
+            <th>ปริมาณ</th><th>Method A</th><th>Method B</th><th>ผลต่าง</th><th>Relative</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in comparison.rows %}
+          <tr>
+            <td>{{ row.name }}</td>
+            <td>{% if row.unit == "A" %}{{ row.method_a|current }}{% else %}{{ row.method_a|voltage }}{% endif %}</td>
+            <td>{% if row.unit == "A" %}{{ row.method_b|current }}{% else %}{{ row.method_b|voltage }}{% endif %}</td>
+            <td>{% if row.unit == "A" %}{{ row.abs_diff|current }}{% else %}{{ row.abs_diff|voltage }}{% endif %}</td>
+            <td>{{ "%.2e"|format(row.rel_diff) }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    {% if result.region != "active" %}
+    <p class="note">
+      หมายเหตุ: การตรงกันของสองวิธีตรวจสอบความถูกต้องของการคำนวณ
+      ไม่ได้ยืนยันความถูกต้องทางกายภาพในโหมด {{ result.region }}
+      — ดูคำเตือนด้านบน
+    </p>
+    {% endif %}
+  </section>
+  {% endif %}
+
+  <section class="card formulas">
+    <h2>สูตรที่ใช้ (Thevenin base divider)</h2>
+    <pre>VBB = VCC · R2 / (R1 + R2)
+RB  = R1 ∥ R2
+IB  = (VBB − VBE) / (RB + (β + 1)·RE)
+IC  = β·IB
+IE  = (β + 1)·IB
+VE  = IE·RE
+VB  = VE + VBE
+VC  = VCC − IC·RC
+VCE = VC − VE</pre>
+    <p>VCE(sat) = {{ vce_sat }} V</p>
+  </section>
+</main>
+</body>
+</html>
