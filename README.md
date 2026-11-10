@@ -14,6 +14,7 @@ NPN แบบ common-emitter ที่ไบแอสด้วย voltage divide
 - แบ่ง region เป็น `Active`, `Cutoff`, `Saturation` และอธิบายสาเหตุ
 - แสดง `IC(sat)` เมื่ออยู่ในย่าน saturation
 - ตารางเปรียบเทียบกับ independent nodal calculation พร้อม `MATCH` / `MISMATCH`
+- แสดงแผนภาพวงจร common-emitter เป็น inline SVG แบบ static (ไม่ใช้ JavaScript หรือรูปภายนอก)
 - หน้าเดียว ไม่ใช้ JavaScript framework หรือ CDN
 
 ## Inputs

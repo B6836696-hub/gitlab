@@ -90,6 +90,20 @@ class TestRoutes(unittest.TestCase):
             "ไม่สามารถคำนวณจุดทำงานได้", response.get_data(as_text=True)
         )
 
+    def test_get_includes_circuit_diagram(self):
+        body = self.client.get("/").get_data(as_text=True)
+        self.assertIn('data-circuit="bjt-ce"', body)
+        self.assertIn('aria-label="BJT common-emitter circuit"', body)
+        self.assertIn(
+            "<title>BJT common-emitter voltage-divider bias circuit</title>",
+            body,
+        )
+        self.assertIn(">Q1<", body)
+
+    def test_valid_post_includes_circuit_diagram(self):
+        body = self.client.post("/", data=VALID).get_data(as_text=True)
+        self.assertIn('data-circuit="bjt-ce"', body)
+
 
 if __name__ == "__main__":
     unittest.main()

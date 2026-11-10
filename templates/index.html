@@ -13,6 +13,73 @@
     <p>คำนวณจุดทำงาน DC ของทรานซิสเตอร์ NPN แบบ voltage-divider bias</p>
   </header>
 
+  <section class="card circuit-card">
+    <h2>วงจร</h2>
+    <div class="circuit-wrap">
+      <svg viewBox="0 0 640 450" role="img" aria-label="BJT common-emitter circuit" data-circuit="bjt-ce">
+        <title>BJT common-emitter voltage-divider bias circuit</title>
+        <desc>NPN transistor Q1 with base voltage divider R1 and R2, collector resistor RC to VCC, and emitter resistor RE to ground.</desc>
+
+        <!-- supply and ground rails -->
+        <line class="schematic-wire" x1="200" y1="50" x2="500" y2="50"/>
+        <line class="schematic-wire" x1="200" y1="375" x2="500" y2="375"/>
+        <line class="schematic-wire" x1="355" y1="375" x2="355" y2="390"/>
+        <line class="schematic-wire" x1="340" y1="390" x2="370" y2="390"/>
+        <line class="schematic-wire" x1="345" y1="397" x2="365" y2="397"/>
+        <line class="schematic-wire" x1="350" y1="404" x2="360" y2="404"/>
+
+        <!-- R1: VCC to base -->
+        <line class="schematic-wire" x1="250" y1="50" x2="250" y2="85"/>
+        <rect class="schematic-component" x="237" y="85" width="26" height="70"/>
+        <line class="schematic-wire" x1="250" y1="155" x2="250" y2="215"/>
+
+        <!-- R2: base to ground -->
+        <line class="schematic-wire" x1="250" y1="215" x2="250" y2="255"/>
+        <rect class="schematic-component" x="237" y="255" width="26" height="70"/>
+        <line class="schematic-wire" x1="250" y1="325" x2="250" y2="375"/>
+
+        <!-- base node to Q1 -->
+        <line class="schematic-wire" x1="250" y1="215" x2="383" y2="215"/>
+
+        <!-- RC: VCC to collector -->
+        <line class="schematic-wire" x1="460" y1="50" x2="460" y2="85"/>
+        <rect class="schematic-component" x="447" y="85" width="26" height="70"/>
+        <line class="schematic-wire" x1="460" y1="155" x2="460" y2="180"/>
+
+        <!-- RE: emitter to ground -->
+        <line class="schematic-wire" x1="460" y1="270" x2="460" y2="340"/>
+        <rect class="schematic-component" x="447" y="270" width="26" height="70"/>
+        <line class="schematic-wire" x1="460" y1="340" x2="460" y2="375"/>
+
+        <!-- NPN transistor Q1 -->
+        <circle class="schematic-transistor" cx="412" cy="215" r="42"/>
+        <line class="schematic-transistor" x1="383" y1="188" x2="383" y2="242"/>
+        <line class="schematic-transistor" x1="383" y1="200" x2="460" y2="180"/>
+        <line class="schematic-transistor" x1="383" y1="230" x2="460" y2="250"/>
+        <line class="schematic-wire" x1="460" y1="180" x2="460" y2="155"/>
+        <line class="schematic-wire" x1="460" y1="250" x2="460" y2="270"/>
+        <polygon class="schematic-arrow" points="446,247.5 428.8,250.6 432,237"/>
+
+        <!-- junctions -->
+        <circle class="schematic-node" cx="250" cy="50" r="4"/>
+        <circle class="schematic-node" cx="460" cy="50" r="4"/>
+        <circle class="schematic-node" cx="250" cy="215" r="4"/>
+        <circle class="schematic-node" cx="250" cy="375" r="4"/>
+        <circle class="schematic-node" cx="460" cy="375" r="4"/>
+
+        <!-- labels -->
+        <text class="schematic-label" x="200" y="36" text-anchor="start">VCC</text>
+        <text class="schematic-label" x="278" y="125" text-anchor="start">R1</text>
+        <text class="schematic-label" x="278" y="295" text-anchor="start">R2</text>
+        <text class="schematic-label" x="487" y="125" text-anchor="start">RC</text>
+        <text class="schematic-label" x="487" y="305" text-anchor="start">RE</text>
+        <text class="schematic-label" x="487" y="225" text-anchor="start">Q1</text>
+        <text class="schematic-small" x="355" y="430" text-anchor="middle">GND</text>
+      </svg>
+    </div>
+    <p class="circuit-caption">วงจร common-emitter แบบ voltage-divider bias (NPN)</p>
+  </section>
+
   <section class="card">
     <h2>ค่าอินพุต</h2>
     {% if errors.get("_form") %}<p class="error form-error">{{ errors["_form"] }}</p>{% endif %}

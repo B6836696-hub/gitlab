@@ -228,6 +228,64 @@ pre {
   font-size: 0.9rem;
 }
 
+.circuit-wrap {
+  display: flex;
+  justify-content: center;
+  padding: 0.25rem 0 0.5rem;
+  color: var(--text);
+}
+
+.circuit-wrap svg {
+  width: 100%;
+  max-width: 640px;
+  height: auto;
+}
+
+.circuit-caption {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.9rem;
+  text-align: center;
+}
+
+.schematic-wire,
+.schematic-transistor {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.schematic-transistor {
+  stroke-width: 2.5;
+}
+
+.schematic-component {
+  fill: var(--card);
+  stroke: currentColor;
+  stroke-width: 2;
+}
+
+.schematic-node,
+.schematic-arrow {
+  fill: currentColor;
+}
+
+.schematic-label {
+  fill: currentColor;
+  font-family: "Segoe UI", Tahoma, "Noto Sans Thai", system-ui, sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.schematic-small {
+  fill: var(--muted);
+  font-family: "Segoe UI", Tahoma, "Noto Sans Thai", system-ui, sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+}
+
 @media (max-width: 640px) {
   main {
     width: min(100% - 1rem, 920px);
