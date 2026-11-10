@@ -1,5 +1,6 @@
 import math
 import unittest
+from dataclasses import replace
 
 from bjt import BiasInputs, validate_inputs
 from bjt import VCE_SAT_V, calculate_operating_point, classify_region
@@ -72,6 +73,21 @@ class TestValidateInputs(unittest.TestCase):
         self.assertEqual(errors, {})
         self.assertIsNotNone(inputs)
 
+    def test_rejects_values_above_magnitude_limit(self):
+        for field in ("vcc", "r1", "r2", "rc", "re", "beta", "vbe"):
+            with self.subTest(field=field):
+                inputs, errors = validate_inputs(dict(VALID, **{field: "1e13"}))
+                self.assertIsNone(inputs)
+                self.assertEqual(errors[field], "ต้องมีค่าไม่เกิน 1e12")
+
+    def test_accepts_magnitude_at_limit(self):
+        inputs, errors = validate_inputs(dict(VALID, rc="1e12"))
+        self.assertEqual(errors, {})
+        self.assertTrue(math.isfinite(calculate_operating_point(inputs).vce_v))
+        self.assertTrue(
+            math.isfinite(calculate_nodal_operating_point(inputs).vce_v)
+        )
+
 
 class TestCalculateOperatingPoint(unittest.TestCase):
     def test_worked_example(self):
@@ -128,6 +144,14 @@ class TestCalculateOperatingPoint(unittest.TestCase):
         ):
             self.assertTrue(math.isfinite(value))
 
+    def test_calculation_raises_on_overflow(self):
+        inputs = BiasInputs(
+            vcc_v=1e305, r1_ohm=1e305, r2_ohm=1e305, rc_ohm=1e305,
+            re_ohm=1e305, beta=1e305, vbe_v=0.7,
+        )
+        with self.assertRaises(ValueError):
+            calculate_operating_point(inputs)
+
 
 class TestNodalAndComparison(unittest.TestCase):
     def test_solve_linear_system(self):
@@ -171,6 +195,13 @@ class TestNodalAndComparison(unittest.TestCase):
         for row in comparison.rows:
             if row.method_a == 0 and row.method_b == 0:
                 self.assertEqual(row.rel_diff, 0.0)
+
+    def test_comparison_fails_closed_on_non_finite(self):
+        inputs, _ = validate_inputs(VALID)
+        a = calculate_operating_point(inputs)
+        b = replace(a, vc_v=float("nan"))
+        comparison = compare_operating_points(a, b)
+        self.assertFalse(comparison.matched)
 
 
 if __name__ == "__main__":

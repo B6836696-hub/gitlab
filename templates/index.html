@@ -15,6 +15,7 @@
 
   <section class="card">
     <h2>ค่าอินพุต</h2>
+    {% if errors.get("_form") %}<p class="error form-error">{{ errors["_form"] }}</p>{% endif %}
     <form method="post" action="/">
       <div class="grid">
         {% set fields = [
@@ -74,10 +75,13 @@
     </table>
 
     <h2>ตรวจสอบด้วยการคำนวณอิสระ (Nodal Analysis)</h2>
-    <p class="status {{ 'ok' if comparison.matched else 'bad' }}">
+    <p class="status {{ 'ok' if comparison.matched else 'bad' }}" data-status="{{ 'MATCH' if comparison.matched else 'MISMATCH' }}">
       {{ 'MATCH' if comparison.matched else 'MISMATCH' }}
       <span>ผลต่างสัมพัทธ์สูงสุด {{ "%.2e"|format(comparison.max_rel_diff) }}</span>
     </p>
+    {% if not comparison.matched %}
+    <p class="note warn">MISMATCH — ผลจากสองวิธีไม่ตรงกัน กรุณาตรวจสอบค่าอินพุตหรือการคำนวณ</p>
+    {% endif %}
     <div class="table-scroll">
       <table>
         <thead>

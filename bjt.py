@@ -3,6 +3,7 @@ from dataclasses import dataclass
 from typing import Mapping
 
 FIELD_NAMES = ("vcc", "r1", "r2", "rc", "re", "beta", "vbe")
+MAX_INPUT = 1e12
 
 
 @dataclass(frozen=True)
@@ -34,6 +35,9 @@ def validate_inputs(
             continue
         if not math.isfinite(value):
             errors[name] = "ต้องเป็นจำนวนจำกัด"
+            continue
+        if abs(value) > MAX_INPUT:
+            errors[name] = "ต้องมีค่าไม่เกิน 1e12"
             continue
         parsed[name] = value
 
@@ -67,6 +71,11 @@ def validate_inputs(
 VCE_SAT_V = 0.2
 
 
+def _ensure_finite(*values: float) -> None:
+    if not all(math.isfinite(value) for value in values):
+        raise ValueError("Non-finite operating point")
+
+
 @dataclass(frozen=True)
 class OperatingPoint:
     vbb_v: float
@@ -96,6 +105,7 @@ def calculate_operating_point(inputs: BiasInputs) -> OperatingPoint:
     ib = (vbb - inputs.vbe_v) / (rb + (inputs.beta + 1) * inputs.re_ohm)
 
     if ib <= 0:
+        _ensure_finite(vbb, rb, inputs.vcc_v)
         return OperatingPoint(
             vbb_v=vbb,
             rb_ohm=rb,
@@ -120,6 +130,11 @@ def calculate_operating_point(inputs: BiasInputs) -> OperatingPoint:
     ic_sat = None
     if region == "saturation":
         ic_sat = (inputs.vcc_v - VCE_SAT_V) / (inputs.rc_ohm + inputs.re_ohm)
+
+    values = (vbb, rb, ib, ic, ie, ve, vb, vc, vce)
+    _ensure_finite(*values)
+    if ic_sat is not None:
+        _ensure_finite(ic_sat)
 
     return OperatingPoint(
         vbb_v=vbb,
@@ -174,6 +189,7 @@ def calculate_nodal_operating_point(inputs: BiasInputs) -> OperatingPoint:
     rb = r1 * r2 / (r1 + r2)
 
     if ib <= 0:
+        _ensure_finite(vbb, rb, inputs.vcc_v)
         return OperatingPoint(
             vbb_v=vbb,
             rb_ohm=rb,
@@ -195,6 +211,11 @@ def calculate_nodal_operating_point(inputs: BiasInputs) -> OperatingPoint:
     ic_sat = None
     if region == "saturation":
         ic_sat = (inputs.vcc_v - VCE_SAT_V) / (rc + re)
+
+    values = (vbb, rb, ib, ic, ie, ve, vb, vc, vce)
+    _ensure_finite(*values)
+    if ic_sat is not None:
+        _ensure_finite(ic_sat)
 
     return OperatingPoint(
         vbb_v=vbb,
@@ -243,6 +264,11 @@ def compare_operating_points(a: OperatingPoint, b: OperatingPoint) -> Comparison
         value_b = getattr(b, attr)
         abs_diff = abs(value_a - value_b)
         rel_diff = abs_diff / max(abs(value_a), abs(value_b), 1e-12)
+        if not all(
+            math.isfinite(value)
+            for value in (value_a, value_b, abs_diff, rel_diff)
+        ):
+            rel_diff = float("inf")
         max_rel_diff = max(max_rel_diff, rel_diff)
         rows.append(
             ComparisonRow(

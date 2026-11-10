@@ -55,9 +55,14 @@ def create_app() -> Flask:
             values = {name: request.form.get(name, "") for name in FIELD_NAMES}
             inputs, errors = validate_inputs(values)
             if inputs is not None:
-                result = calculate_operating_point(inputs)
-                independent = calculate_nodal_operating_point(inputs)
-                comparison = compare_operating_points(result, independent)
+                try:
+                    result = calculate_operating_point(inputs)
+                    independent = calculate_nodal_operating_point(inputs)
+                    comparison = compare_operating_points(result, independent)
+                except ValueError:
+                    errors = {
+                        "_form": "ไม่สามารถคำนวณจุดทำงานได้ กรุณาตรวจสอบค่าอินพุต"
+                    }
 
         return render_template(
             "index.html",

@@ -1,6 +1,9 @@
 import unittest
+from dataclasses import replace
+from unittest.mock import patch
 
 from app import create_app, format_current, format_voltage
+from bjt import calculate_operating_point
 
 VALID = {
     "vcc": "12", "r1": "47000", "r2": "10000", "rc": "2200",
@@ -36,7 +39,8 @@ class TestRoutes(unittest.TestCase):
         self.assertIn("1.3237 mA", body)
         self.assertIn("7.7554 V", body)
         self.assertIn("Active", body)
-        self.assertIn("MATCH", body)
+        self.assertIn('data-status="MATCH"', body)
+        self.assertNotIn("MISMATCH", body)
 
     def test_invalid_post_shows_error_and_no_results(self):
         response = self.client.post("/", data=dict(VALID, vcc="0"))
@@ -56,13 +60,35 @@ class TestRoutes(unittest.TestCase):
         response = self.client.post("/", data=dict(VALID, r2="1000"))
         body = response.get_data(as_text=True)
         self.assertIn("Cutoff", body)
-        self.assertIn("MATCH", body)
+        self.assertIn('data-status="MATCH"', body)
+        self.assertNotIn("MISMATCH", body)
 
     def test_saturation_post_shows_warning(self):
         response = self.client.post("/", data=dict(VALID, rc="10000", re="100"))
         body = response.get_data(as_text=True)
         self.assertIn("Saturation", body)
         self.assertIn("IC(sat)", body)
+
+    def test_mismatch_post_shows_mismatch_warning(self):
+        def wrong_nodal(inputs):
+            point = calculate_operating_point(inputs)
+            return replace(point, ic_a=point.ic_a * 2)
+
+        with patch("app.calculate_nodal_operating_point", side_effect=wrong_nodal):
+            response = self.client.post("/", data=VALID)
+        body = response.get_data(as_text=True)
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('data-status="MISMATCH"', body)
+        self.assertIn("MISMATCH", body)
+        self.assertNotIn('data-status="MATCH"', body)
+
+    def test_calculation_error_renders_form_error(self):
+        with patch("app.calculate_operating_point", side_effect=ValueError("boom")):
+            response = self.client.post("/", data=VALID)
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(
+            "ไม่สามารถคำนวณจุดทำงานได้", response.get_data(as_text=True)
+        )
 
 
 if __name__ == "__main__":
