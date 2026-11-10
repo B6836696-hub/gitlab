@@ -134,3 +134,124 @@ def calculate_operating_point(inputs: BiasInputs) -> OperatingPoint:
         region=region,
         ic_sat_a=ic_sat,
     )
+
+
+REL_TOL = 1e-9
+
+
+def solve_linear_system(matrix: list[list[float]], rhs: list[float]) -> list[float]:
+    n = len(matrix)
+    a = [row[:] + [rhs[i]] for i, row in enumerate(matrix)]
+    for col in range(n):
+        pivot = max(range(col, n), key=lambda r: abs(a[r][col]))
+        if abs(a[pivot][col]) < 1e-18:
+            raise ValueError("Singular matrix")
+        a[col], a[pivot] = a[pivot], a[col]
+        for r in range(col + 1, n):
+            factor = a[r][col] / a[col][col]
+            for c in range(col, n + 1):
+                a[r][c] -= factor * a[col][c]
+    x = [0.0] * n
+    for i in range(n - 1, -1, -1):
+        x[i] = (a[i][n] - sum(a[i][j] * x[j] for j in range(i + 1, n))) / a[i][i]
+    return x
+
+
+def calculate_nodal_operating_point(inputs: BiasInputs) -> OperatingPoint:
+    r1, r2 = inputs.r1_ohm, inputs.r2_ohm
+    rc, re, beta = inputs.rc_ohm, inputs.re_ohm, inputs.beta
+
+    matrix = [
+        [1 / r1 + 1 / r2, 0.0, 0.0, 1.0],
+        [0.0, 1 / re, 0.0, -(beta + 1)],
+        [0.0, 0.0, 1 / rc, beta],
+        [1.0, -1.0, 0.0, 0.0],
+    ]
+    rhs = [inputs.vcc_v / r1, 0.0, inputs.vcc_v / rc, inputs.vbe_v]
+    vb, ve, vc, ib = solve_linear_system(matrix, rhs)
+
+    vbb = inputs.vcc_v * r2 / (r1 + r2)
+    rb = r1 * r2 / (r1 + r2)
+
+    if ib <= 0:
+        return OperatingPoint(
+            vbb_v=vbb,
+            rb_ohm=rb,
+            ib_a=0.0,
+            ic_a=0.0,
+            ie_a=0.0,
+            ve_v=0.0,
+            vb_v=vbb,
+            vc_v=inputs.vcc_v,
+            vce_v=inputs.vcc_v,
+            region="cutoff",
+            ic_sat_a=None,
+        )
+
+    ic = beta * ib
+    ie = (beta + 1) * ib
+    vce = vc - ve
+    region = classify_region(ib, vce)
+    ic_sat = None
+    if region == "saturation":
+        ic_sat = (inputs.vcc_v - VCE_SAT_V) / (rc + re)
+
+    return OperatingPoint(
+        vbb_v=vbb,
+        rb_ohm=rb,
+        ib_a=ib,
+        ic_a=ic,
+        ie_a=ie,
+        ve_v=ve,
+        vb_v=vb,
+        vc_v=vc,
+        vce_v=vce,
+        region=region,
+        ic_sat_a=ic_sat,
+    )
+
+
+@dataclass(frozen=True)
+class ComparisonRow:
+    name: str
+    unit: str
+    method_a: float
+    method_b: float
+    abs_diff: float
+    rel_diff: float
+
+
+@dataclass(frozen=True)
+class Comparison:
+    rows: list[ComparisonRow]
+    max_rel_diff: float
+    matched: bool
+
+
+COMPARISON_FIELDS = (
+    ("ib_a", "IB", "A"), ("ic_a", "IC", "A"), ("ie_a", "IE", "A"),
+    ("vb_v", "VB", "V"), ("ve_v", "VE", "V"), ("vc_v", "VC", "V"),
+    ("vce_v", "VCE", "V"),
+)
+
+
+def compare_operating_points(a: OperatingPoint, b: OperatingPoint) -> Comparison:
+    rows: list[ComparisonRow] = []
+    max_rel_diff = 0.0
+    for attr, name, unit in COMPARISON_FIELDS:
+        value_a = getattr(a, attr)
+        value_b = getattr(b, attr)
+        abs_diff = abs(value_a - value_b)
+        rel_diff = abs_diff / max(abs(value_a), abs(value_b), 1e-12)
+        max_rel_diff = max(max_rel_diff, rel_diff)
+        rows.append(
+            ComparisonRow(
+                name=name,
+                unit=unit,
+                method_a=value_a,
+                method_b=value_b,
+                abs_diff=abs_diff,
+                rel_diff=rel_diff,
+            )
+        )
+    return Comparison(rows=rows, max_rel_diff=max_rel_diff, matched=max_rel_diff <= REL_TOL)
