@@ -78,17 +78,23 @@ VCE = VC − VE                           = 8.0327787022 V
 
 | กรณี | เลือกโหมดและกรอกค่า | คาดหมายก่อนรัน | เห็นจริง | วิธีตรวจ | สถานะ | หลักฐาน |
 |---|---|---|---|---|---|---|
-| A1 · โหมดเดิม | Divider · R1 = 100000 Ω, R2 = 22000 Ω, RE = 1000 Ω, RC = 2200 Ω, VCC = 12 V, β = 100, VBE = 0.7 V | IC = 1.2298581463 mA · VCE = 8.0521553505 V · Active | — | — | — | — |
-| A2 · Fixed | Fixed · RB = 1000000 Ω, RC = 2200 Ω, VCC = 12 V, β = 100, VBE = 0.7 V (ไม่ต้องกรอก R1/R2/RE) | IC = 1.13 mA · VCE = 9.514 V · Active | — | — | — | — |
-| A3 · Emitter | Emitter · RB = 1000000 Ω, RE = 1000 Ω, RC = 2200 Ω, VCC = 12 V, β = 100, VBE = 0.7 V | IC = 1.0263396912 mA · VCE = 8.7054495913 V · Active | — | — | — | — |
-| A4 · เปลี่ยนค่าเดียว | Emitter · เหมือน A3 แต่ RE = 2000 Ω | IC = 0.9400998336 mA · VCE = 8.0327787022 V · IC ลดจาก A3 | — | — | — | — |
-| A5 · อินพุตผิด | Fixed · RB = 0 Ω | มีข้อความให้แก้ RB, เว็บไม่ล่ม, ไม่แสดงผลเดิม | — | — | — | — |
+| A1 · โหมดเดิม | Divider · R1 = 100000 Ω, R2 = 22000 Ω, RE = 1000 Ω, RC = 2200 Ω, VCC = 12 V, β = 100, VBE = 0.7 V | IC = 1.2298581463 mA · VCE = 8.0521553505 V · Active | IC = 1.2299 mA · VCE = 8.0522 V · Active · MATCH | OpenCode Browser | PASS | ตารางผลบนหน้าเว็บ |
+| A2 · Fixed | Fixed · RB = 1000000 Ω, RC = 2200 Ω, VCC = 12 V, β = 100, VBE = 0.7 V (ไม่ต้องกรอก R1/R2/RE) | IC = 1.13 mA · VCE = 9.514 V · Active | IC = 1.13 mA · VCE = 9.514 V · Active (ฟอร์มมีเฉพาะ VCC, RB, RC, β, VBE) | OpenCode Browser | PASS | ตารางผลบนหน้าเว็บ |
+| A3 · Emitter | Emitter · RB = 1000000 Ω, RE = 1000 Ω, RC = 2200 Ω, VCC = 12 V, β = 100, VBE = 0.7 V | IC = 1.0263396912 mA · VCE = 8.7054495913 V · Active | IC = 1.0263 mA · VCE = 8.7054 V · Active | OpenCode Browser | PASS | `docs/evidence/A3-emitter.png` |
+| A4 · เปลี่ยนค่าเดียว | Emitter · เหมือน A3 แต่ RE = 2000 Ω | IC = 0.9400998336 mA · VCE = 8.0327787022 V · IC ลดจาก A3 | IC = 940.0998 µA (0.9401 mA) · VCE = 8.0328 V · IC ลดจาก A3 ตามทำนาย | OpenCode Browser | PASS | ตารางผลบนหน้าเว็บ (โหมดยังเป็น Emitter, RE = 2000) |
+| A5 · อินพุตผิด | Fixed · RB = 0 Ω | มีข้อความให้แก้ RB, เว็บไม่ล่ม, ไม่แสดงผลเดิม | ข้อความ `ต้องมากกว่า 0 Ω` ใต้ช่อง RB, ไม่มีส่วนผลลัพธ์ | OpenCode Browser | PASS | `docs/evidence/A5-fixed-rb0.png` |
 
 ## หลักฐานจากเบราว์เซอร์
 
-- วิธีตรวจจริง: _จะระบุหลังรัน (OpenCode Browser / Playwright MCP / Manual)_
-- ข้อความผลที่คัดจากหน้าเว็บ: _จะระบุหลังรัน_
-- Screenshot: _จะระบุหลังรัน_
+- วิธีตรวจจริง: **OpenCode Browser (browser tool ในแอป)** — ไม่ได้ใช้ Playwright MCP
+  ตามทางเลือกสำรองที่ใบงานอนุญาต; เปิด `http://127.0.0.1:5000/` และกรอกฟอร์มจริง
+- ข้อความผลที่คัดจากหน้าเว็บ (A3): `จุดทำงาน DC — Emitter Bias`, `Active`,
+  `IC 1.0263 mA`, `VCE 8.7054 V`, `VE 1.0366 V`
+- ข้อความ error ที่คัดจากหน้าเว็บ (A5): `ต้องมากกว่า 0 Ω` ใต้ช่อง `ตัวต้านทานฐาน RB (Ω)`
+  และไม่มีส่วน `จุดทำงาน DC`
+- Screenshot: `docs/evidence/A3-emitter.png` (A3) และ
+  `docs/evidence/A5-fixed-rb0.png` (A5)
+
 
 ## บทบาทของ AI และสิ่งที่นักศึกษาตรวจ
 
