@@ -73,7 +73,8 @@ header p {
   font-weight: 700;
 }
 
-input[type="number"] {
+input[type="number"],
+select {
   width: 100%;
   padding: 0.55rem 0.65rem;
   border: 1px solid var(--line);
@@ -82,9 +83,30 @@ input[type="number"] {
   background: #fff;
 }
 
-input[type="number"]:focus {
+input[type="number"]:focus,
+select:focus {
   outline: 2px solid rgb(31 111 235 / 25%);
   border-color: var(--accent);
+}
+
+.mode-field {
+  max-width: 340px;
+  margin-bottom: 0.9rem;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+.actions button {
+  margin-top: 1.1rem;
+}
+
+button.secondary {
+  background: #e8edf3;
+  color: var(--text);
 }
 
 .error {
