@@ -7,172 +7,143 @@
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-<main>
-  <header>
-    <h1>BJT Common-Emitter DC Bias</h1>
-    <p>คำนวณจุดทำงาน DC ของทรานซิสเตอร์ NPN แบบ common-emitter — เลือก Voltage Divider, Fixed หรือ Emitter bias</p>
+<div class="page">
+  <header class="topbar">
+    <a class="brand" href="/">
+      <span class="brand-mark" aria-hidden="true">⌁</span>
+      <span class="brand-name">BJT Lab</span>
+    </a>
+    <span class="course-pill">ENG29 2121 · Lab 03</span>
   </header>
 
-  <section class="card circuit-card">
-    <h2>วงจร</h2>
-    <div class="circuit-wrap">
-      <svg viewBox="0 0 640 450" role="img" aria-label="BJT common-emitter circuit" data-circuit="bjt-ce">
-        <title>BJT common-emitter {% if mode == "divider" %}voltage-divider bias{% else %}{{ mode_label|lower }}{% endif %} circuit</title>
-        <desc>NPN transistor Q1 with base resistor from VCC, collector resistor RC to VCC, and emitter path to ground.</desc>
-
-        <!-- supply and ground rails -->
-        <line class="schematic-wire" x1="200" y1="50" x2="500" y2="50"/>
-        <line class="schematic-wire" x1="200" y1="375" x2="500" y2="375"/>
-        <line class="schematic-wire" x1="355" y1="375" x2="355" y2="390"/>
-        <line class="schematic-wire" x1="340" y1="390" x2="370" y2="390"/>
-        <line class="schematic-wire" x1="345" y1="397" x2="365" y2="397"/>
-        <line class="schematic-wire" x1="350" y1="404" x2="360" y2="404"/>
-
-        <!-- base resistor: R1 (divider) or RB (fixed / emitter) -->
-        <line class="schematic-wire" x1="250" y1="50" x2="250" y2="85"/>
-        <rect class="schematic-component" x="237" y="85" width="26" height="70"/>
-        <line class="schematic-wire" x1="250" y1="155" x2="250" y2="215"/>
-
-        {% if mode == "divider" %}
-        <!-- R2: base to ground -->
-        <line class="schematic-wire" x1="250" y1="215" x2="250" y2="255"/>
-        <rect class="schematic-component" x="237" y="255" width="26" height="70"/>
-        <line class="schematic-wire" x1="250" y1="325" x2="250" y2="375"/>
-        {% endif %}
-
-        <!-- base node to Q1 -->
-        <line class="schematic-wire" x1="250" y1="215" x2="383" y2="215"/>
-
-        <!-- RC: VCC to collector -->
-        <line class="schematic-wire" x1="460" y1="50" x2="460" y2="85"/>
-        <rect class="schematic-component" x="447" y="85" width="26" height="70"/>
-        <line class="schematic-wire" x1="460" y1="155" x2="460" y2="180"/>
-
-        {% if mode == "fixed" %}
-        <!-- emitter directly to ground -->
-        <line class="schematic-wire" x1="460" y1="270" x2="460" y2="375"/>
-        {% else %}
-        <!-- RE: emitter to ground -->
-        <line class="schematic-wire" x1="460" y1="270" x2="460" y2="340"/>
-        <rect class="schematic-component" x="447" y="270" width="26" height="70"/>
-        <line class="schematic-wire" x1="460" y1="340" x2="460" y2="375"/>
-        {% endif %}
-
-        <!-- NPN transistor Q1 -->
-        <circle class="schematic-transistor" cx="412" cy="215" r="42"/>
-        <line class="schematic-transistor" x1="383" y1="188" x2="383" y2="242"/>
-        <line class="schematic-transistor" x1="383" y1="200" x2="460" y2="180"/>
-        <line class="schematic-transistor" x1="383" y1="230" x2="460" y2="250"/>
-        <line class="schematic-wire" x1="460" y1="180" x2="460" y2="155"/>
-        <line class="schematic-wire" x1="460" y1="250" x2="460" y2="270"/>
-        <polygon class="schematic-arrow" points="446,247.5 428.8,250.6 432,237"/>
-
-        <!-- junctions -->
-        <circle class="schematic-node" cx="250" cy="50" r="4"/>
-        <circle class="schematic-node" cx="460" cy="50" r="4"/>
-        <circle class="schematic-node" cx="250" cy="215" r="4"/>
-        {% if mode == "divider" %}
-        <circle class="schematic-node" cx="250" cy="375" r="4"/>
-        {% endif %}
-        <circle class="schematic-node" cx="460" cy="375" r="4"/>
-
-        <!-- labels -->
-        <text class="schematic-label" x="200" y="36" text-anchor="start">VCC</text>
-        <text class="schematic-label" x="278" y="125" text-anchor="start">{% if mode == "divider" %}R1{% else %}RB{% endif %}</text>
-        {% if mode == "divider" %}
-        <text class="schematic-label" x="278" y="295" text-anchor="start">R2</text>
-        {% endif %}
-        <text class="schematic-label" x="487" y="125" text-anchor="start">RC</text>
-        {% if mode != "fixed" %}
-        <text class="schematic-label" x="487" y="305" text-anchor="start">RE</text>
-        {% endif %}
-        <text class="schematic-label" x="487" y="225" text-anchor="start">Q1</text>
-        <text class="schematic-small" x="355" y="430" text-anchor="middle">GND</text>
-      </svg>
-    </div>
-    <p class="circuit-caption">{{ mode_label }} — วงจร common-emitter (NPN)</p>
+  <section class="hero">
+    <p class="eyebrow">BJT Common-Emitter · DC Operating Point</p>
+    <h1>คำนวณจุดทำงาน <span class="grad">BJT</span><br>ในไม่กี่วินาที</h1>
+    <p class="lead">เลือกวงจรไบอัส กรอกค่า แล้วดู IC, VCE และช่วงการทำงานได้ทันที</p>
   </section>
 
-  <section class="card">
-    <h2>ค่าอินพุต</h2>
-    {% if errors.get("_form") %}<p class="error form-error">{{ errors["_form"] }}</p>{% endif %}
-    <form method="post" action="/">
-      <label class="field mode-field">
-        <span>โหมดไบอัส <strong>Mode</strong></span>
-        <select name="mode">
-          {% for value, label in mode_options %}
-          <option value="{{ value }}"{% if value == mode %} selected{% endif %}>{{ label }}</option>
-          {% endfor %}
-        </select>
-      </label>
-      <div class="grid">
-        {% for name, symbol, label, unit in fields %}
-        <label class="field">
-          <span>{{ label }} <strong>{{ symbol }}</strong>{% if unit %} ({{ unit }}){% endif %}</span>
-          <input type="number" name="{{ name }}" step="any" required value="{{ values[name] }}">
-          {% if errors.get(name) %}<span class="error">{{ errors[name] }}</span>{% endif %}
-        </label>
+  <div class="shell">
+    <form class="mode-switch" method="get" action="/">
+      {% for name, symbol, label, unit in fields %}
+      <input type="hidden" name="{{ name }}" value="{{ values[name] }}">
+      {% endfor %}
+      <div class="tabs" aria-label="โหมดไบอัส">
+        {% for value, label, short in mode_options %}
+        <button type="submit" name="mode" value="{{ value }}"
+          class="tab{% if value == mode %} on{% endif %}"
+          {% if value == mode %}aria-current="page"{% endif %}><span class="tab-long">{{ label }}</span><span class="tab-short">{{ short }}</span></button>
         {% endfor %}
       </div>
-      <div class="actions">
-        <button type="submit">คำนวณ</button>
-        <button type="submit" class="secondary" formmethod="get" formaction="/">เปลี่ยนโหมด</button>
+    </form>
+
+    <form method="post" action="/">
+      <input type="hidden" name="mode" value="{{ mode }}">
+
+      <div class="cols">
+        <section class="card form-card">
+          <div class="card-head">
+            <h2>ค่าอุปกรณ์</h2>
+            <span class="mode-chip">{{ mode_label }}</span>
+          </div>
+
+          {% if errors.get("_form") %}<p class="alert">{{ errors["_form"] }}</p>{% endif %}
+
+          <div class="fields">
+            {% for name, symbol, label, unit in fields %}
+            <label class="field">
+              <span class="field-label">{{ label }} <b>{{ symbol }}</b></span>
+              <span class="input-wrap">
+                <input type="number" name="{{ name }}" step="any" required value="{{ values[name] }}">
+                {% if unit %}<span class="unit">{{ unit }}</span>{% endif %}
+              </span>
+              {% if errors.get(name) %}<span class="error">{{ errors[name] }}</span>{% endif %}
+            </label>
+            {% endfor %}
+          </div>
+
+          <button class="btn primary" type="submit">คำนวณจุดทำงาน</button>
+          <p class="hint">ค่าเริ่มต้นของโหมดนี้โหลดให้แล้ว · เปลี่ยนโหมดได้จากแท็บด้านบน</p>
+        </section>
+
+        <section class="result-card"{% if result %} id="results"{% endif %}>
+          {% if result %}
+          <div class="result-head">
+            <h2>ผลลัพธ์ · {{ mode_label }}</h2>
+            <span class="badge badge-{{ result.region }}">{{ result.region|capitalize }}</span>
+          </div>
+
+          {% set ic_parts = (result.ic_a|current).split(' ') %}
+          {% set vce_parts = (result.vce_v|voltage).split(' ') %}
+          <div class="metrics">
+            <div class="metric">
+              <small>IC · กระแสคอลเลกเตอร์</small>
+              <b><span class="sr-only">{{ result.ic_a|current }}</span><span aria-hidden="true">{{ ic_parts[0] }}<span class="u">{{ ic_parts[1] }}</span></span></b>
+            </div>
+            <div class="metric">
+              <small>VCE · Collector–Emitter</small>
+              <b><span class="sr-only">{{ result.vce_v|voltage }}</span><span aria-hidden="true">{{ vce_parts[0] }}<span class="u">{{ vce_parts[1] }}</span></span></b>
+            </div>
+          </div>
+
+          <p class="region-note {{ result.region }}">
+            {% if result.region == "active" %}
+            อยู่ในย่าน Active — สมการ DC ใช้งานได้ตามปกติ
+            {% elif result.region == "cutoff" %}
+            Cutoff — ไบแอสฐาน-อิมิตเตอร์ไม่ forward bias กระแสจึงประมาณเป็นศูนย์
+            {% else %}
+            Saturation — VCE ต่ำกว่า VCE(sat) สมการ active-region ใช้ได้เพียงประมาณเท่านั้น
+            {% endif %}
+          </p>
+
+          <div class="chips">
+            <span>IB <b>{{ result.ib_a|current }}</b></span>
+            <span>IE <b>{{ result.ie_a|current }}</b></span>
+            <span>VE <b>{{ result.ve_v|voltage }}</b></span>
+            <span>VB <b>{{ result.vb_v|voltage }}</b></span>
+            <span>VC <b>{{ result.vc_v|voltage }}</b></span>
+            <span>RB <b>{{ result.rb_ohm|resistance }}</b></span>
+            {% if mode == "divider" %}<span>VBB <b>{{ result.vbb_v|voltage }}</b></span>{% endif %}
+            {% if result.region == "saturation" %}<span>IC(sat) <b>{{ result.ic_sat_a|current }}</b></span>{% endif %}
+          </div>
+
+          <div class="eq">
+            {% if mode == "divider" %}IB = (VBB − VBE) / (RB + (β+1)·RE)
+            {% elif mode == "fixed" %}IB = (VCC − VBE) / RB
+            {% else %}IB = (VCC − VBE) / (RB + (β+1)·RE){% endif %}
+          </div>
+          {% else %}
+          <div class="empty">
+            <span class="empty-mark" aria-hidden="true">⌁</span>
+            <h2>พร้อมคำนวณ</h2>
+            <p>กรอกค่าแล้วกด “คำนวณจุดทำงาน” ผลลัพธ์จะแสดงที่นี่</p>
+            <div class="eq">
+              {% if mode == "divider" %}IB = (VBB − VBE) / (RB + (β+1)·RE)
+              {% elif mode == "fixed" %}IB = (VCC − VBE) / RB
+              {% else %}IB = (VCC − VBE) / (RB + (β+1)·RE){% endif %}
+            </div>
+          </div>
+          {% endif %}
+        </section>
       </div>
     </form>
-  </section>
+  </div>
 
-  {% if result %}
-  <section class="card" id="results">
-    <div class="result-head">
-      <h2>จุดทำงาน DC — {{ mode_label }}</h2>
-      <span class="badge badge-{{ result.region }}">{{ result.region|capitalize }}</span>
+  {% if comparison %}
+  <section class="card compare-card">
+    <div class="card-head">
+      <h2>ตรวจสอบด้วยการคำนวณอิสระ (Nodal Analysis)</h2>
+      <span class="status-pill {{ 'ok' if comparison.matched else 'bad' }}" data-status="{{ 'MATCH' if comparison.matched else 'MISMATCH' }}">
+        {{ 'MATCH' if comparison.matched else 'MISMATCH' }}
+        <span>ผลต่างสูงสุด {{ "%.2e"|format(comparison.max_rel_diff) }}</span>
+      </span>
     </div>
-
-    {% if result.region == "active" %}
-    <p class="note ok">ทรานซิสเตอร์อยู่ในย่าน Active — สมการ DC ใช้งานได้ตามปกติ</p>
-    {% elif result.region == "cutoff" %}
-    <p class="note warn">Cutoff — ไบแอสฐาน-อิมิตเตอร์ไม่ forward bias กระแสจึงประมาณเป็นศูนย์</p>
-    {% else %}
-    <p class="note warn">Saturation — ค่า VCE ต่ำกว่า VCE(sat) สมการ active-region ไม่ใช้ได้จริง ค่าที่แสดงเป็นการประมาณเท่านั้น</p>
-    {% endif %}
-
-    <table>
-      <thead>
-        <tr><th>ปริมาณ</th><th>ค่า</th></tr>
-      </thead>
-      <tbody>
-        {% if mode == "divider" %}
-        <tr><td>VBB</td><td>{{ result.vbb_v|voltage }}</td></tr>
-        {% endif %}
-        <tr><td>RB</td><td>{{ result.rb_ohm|round(4) }} Ω</td></tr>
-        <tr><td>IB</td><td>{{ result.ib_a|current }}</td></tr>
-        <tr><td>IC</td><td>{{ result.ic_a|current }}</td></tr>
-        <tr><td>IE</td><td>{{ result.ie_a|current }}</td></tr>
-        <tr><td>VE</td><td>{{ result.ve_v|voltage }}</td></tr>
-        <tr><td>VB</td><td>{{ result.vb_v|voltage }}</td></tr>
-        <tr><td>VC</td><td>{{ result.vc_v|voltage }}</td></tr>
-        <tr><td>VCE</td><td>{{ result.vce_v|voltage }}</td></tr>
-        {% if result.region == "saturation" %}
-        <tr><td>IC(sat)</td><td>{{ result.ic_sat_a|current }}</td></tr>
-        {% endif %}
-      </tbody>
-    </table>
-
-    {% if comparison %}
-    <h2>ตรวจสอบด้วยการคำนวณอิสระ (Nodal Analysis)</h2>
-    <p class="status {{ 'ok' if comparison.matched else 'bad' }}" data-status="{{ 'MATCH' if comparison.matched else 'MISMATCH' }}">
-      {{ 'MATCH' if comparison.matched else 'MISMATCH' }}
-      <span>ผลต่างสัมพัทธ์สูงสุด {{ "%.2e"|format(comparison.max_rel_diff) }}</span>
-    </p>
     {% if not comparison.matched %}
-    <p class="note warn">MISMATCH — ผลจากสองวิธีไม่ตรงกัน กรุณาตรวจสอบค่าอินพุตหรือการคำนวณ</p>
+    <p class="alert">MISMATCH — ผลจากสองวิธีไม่ตรงกัน กรุณาตรวจสอบค่าอินพุตหรือการคำนวณ</p>
     {% endif %}
     <div class="table-scroll">
       <table>
         <thead>
-          <tr>
-            <th>ปริมาณ</th><th>Method A</th><th>Method B</th><th>ผลต่าง</th><th>Relative</th>
-          </tr>
+          <tr><th>ปริมาณ</th><th>Method A</th><th>Method B</th><th>ผลต่าง</th><th>Relative</th></tr>
         </thead>
         <tbody>
           {% for row in comparison.rows %}
@@ -181,28 +152,87 @@
             <td>{% if row.unit == "A" %}{{ row.method_a|current }}{% else %}{{ row.method_a|voltage }}{% endif %}</td>
             <td>{% if row.unit == "A" %}{{ row.method_b|current }}{% else %}{{ row.method_b|voltage }}{% endif %}</td>
             <td>{% if row.unit == "A" %}{{ row.abs_diff|current }}{% else %}{{ row.abs_diff|voltage }}{% endif %}</td>
-            <td>{{ "%.2e"|format(row.rel_diff) }}</td>
+            <td class="mono">{{ "%.2e"|format(row.rel_diff) }}</td>
           </tr>
           {% endfor %}
         </tbody>
       </table>
     </div>
-
     {% if result.region != "active" %}
-    <p class="note">
-      หมายเหตุ: การตรงกันของสองวิธีตรวจสอบความถูกต้องของการคำนวณ
-      ไม่ได้ยืนยันความถูกต้องทางกายภาพในโหมด {{ result.region }}
-      — ดูคำเตือนด้านบน
-    </p>
-    {% endif %}
+    <p class="hint">การตรงกันของสองวิธีตรวจความถูกต้องของการคำนวณ ไม่ได้ยืนยันความถูกต้องทางกายภาพในโหมด {{ result.region }}</p>
     {% endif %}
   </section>
   {% endif %}
 
-  <section class="card formulas">
-    {% if mode == "divider" %}
-    <h2>สูตรที่ใช้ (Thevenin base divider)</h2>
-    <pre>VBB = VCC · R2 / (R1 + R2)
+  <div class="lower-grid">
+    <section class="card circuit-card">
+      <div class="card-head"><h2>วงจร</h2><span class="mode-chip">{{ mode_label }}</span></div>
+      <div class="circuit-wrap">
+        <svg viewBox="0 0 640 450" role="img" aria-label="BJT common-emitter circuit" data-circuit="bjt-ce">
+          <title>BJT common-emitter {% if mode == "divider" %}voltage-divider bias{% else %}{{ mode_label|lower }}{% endif %} circuit</title>
+          <desc>NPN transistor Q1 with base resistor from VCC, collector resistor RC to VCC, and emitter path to ground.</desc>
+
+          <line class="schematic-wire" x1="200" y1="50" x2="500" y2="50"/>
+          <line class="schematic-wire" x1="200" y1="375" x2="500" y2="375"/>
+          <line class="schematic-wire" x1="355" y1="375" x2="355" y2="390"/>
+          <line class="schematic-wire" x1="340" y1="390" x2="370" y2="390"/>
+          <line class="schematic-wire" x1="345" y1="397" x2="365" y2="397"/>
+          <line class="schematic-wire" x1="350" y1="404" x2="360" y2="404"/>
+
+          <line class="schematic-wire" x1="250" y1="50" x2="250" y2="85"/>
+          <rect class="schematic-component" x="237" y="85" width="26" height="70"/>
+          <line class="schematic-wire" x1="250" y1="155" x2="250" y2="215"/>
+
+          {% if mode == "divider" %}
+          <line class="schematic-wire" x1="250" y1="215" x2="250" y2="255"/>
+          <rect class="schematic-component" x="237" y="255" width="26" height="70"/>
+          <line class="schematic-wire" x1="250" y1="325" x2="250" y2="375"/>
+          {% endif %}
+
+          <line class="schematic-wire" x1="250" y1="215" x2="383" y2="215"/>
+
+          <line class="schematic-wire" x1="460" y1="50" x2="460" y2="85"/>
+          <rect class="schematic-component" x="447" y="85" width="26" height="70"/>
+          <line class="schematic-wire" x1="460" y1="155" x2="460" y2="180"/>
+
+          {% if mode == "fixed" %}
+          <line class="schematic-wire" x1="460" y1="270" x2="460" y2="375"/>
+          {% else %}
+          <line class="schematic-wire" x1="460" y1="270" x2="460" y2="340"/>
+          <rect class="schematic-component" x="447" y="270" width="26" height="70"/>
+          <line class="schematic-wire" x1="460" y1="340" x2="460" y2="375"/>
+          {% endif %}
+
+          <circle class="schematic-transistor" cx="412" cy="215" r="42"/>
+          <line class="schematic-transistor" x1="383" y1="188" x2="383" y2="242"/>
+          <line class="schematic-transistor" x1="383" y1="200" x2="460" y2="180"/>
+          <line class="schematic-transistor" x1="383" y1="230" x2="460" y2="250"/>
+          <line class="schematic-wire" x1="460" y1="180" x2="460" y2="155"/>
+          <line class="schematic-wire" x1="460" y1="250" x2="460" y2="270"/>
+          <polygon class="schematic-arrow" points="446,247.5 428.8,250.6 432,237"/>
+
+          <circle class="schematic-node" cx="250" cy="50" r="4"/>
+          <circle class="schematic-node" cx="460" cy="50" r="4"/>
+          <circle class="schematic-node" cx="250" cy="215" r="4"/>
+          {% if mode == "divider" %}<circle class="schematic-node" cx="250" cy="375" r="4"/>{% endif %}
+          <circle class="schematic-node" cx="460" cy="375" r="4"/>
+
+          <text class="schematic-label" x="200" y="36" text-anchor="start">VCC</text>
+          <text class="schematic-label" x="278" y="125" text-anchor="start">{% if mode == "divider" %}R1{% else %}RB{% endif %}</text>
+          {% if mode == "divider" %}<text class="schematic-label" x="278" y="295" text-anchor="start">R2</text>{% endif %}
+          <text class="schematic-label" x="487" y="125" text-anchor="start">RC</text>
+          {% if mode != "fixed" %}<text class="schematic-label" x="487" y="305" text-anchor="start">RE</text>{% endif %}
+          <text class="schematic-label" x="487" y="225" text-anchor="start">Q1</text>
+          <text class="schematic-small" x="355" y="430" text-anchor="middle">GND</text>
+        </svg>
+      </div>
+      <p class="circuit-caption">{{ mode_label }} — วงจร common-emitter (NPN)</p>
+    </section>
+
+    <section class="card formulas">
+      {% if mode == "divider" %}
+      <h2>สูตรที่ใช้ · Thevenin base divider</h2>
+      <pre>VBB = VCC · R2 / (R1 + R2)
 RB  = R1 ∥ R2
 IB  = (VBB − VBE) / (RB + (β + 1)·RE)
 IC  = β·IB
@@ -211,27 +241,33 @@ VE  = IE·RE
 VB  = VE + VBE
 VC  = VCC − IC·RC
 VCE = VC − VE</pre>
-    {% elif mode == "fixed" %}
-    <h2>สูตรที่ใช้ (Fixed Bias)</h2>
-    <pre>IB  = (VCC − VBE) / RB
+      {% elif mode == "fixed" %}
+      <h2>สูตรที่ใช้ · Fixed Bias</h2>
+      <pre>IB  = (VCC − VBE) / RB
 IC  = β·IB
 IE  = (β + 1)·IB
 VE  = 0 V
 VB  = VBE
 VC  = VCC − IC·RC
 VCE = VC</pre>
-    {% else %}
-    <h2>สูตรที่ใช้ (Emitter Bias)</h2>
-    <pre>IB  = (VCC − VBE) / (RB + (β + 1)·RE)
+      {% else %}
+      <h2>สูตรที่ใช้ · Emitter Bias</h2>
+      <pre>IB  = (VCC − VBE) / (RB + (β + 1)·RE)
 IC  = β·IB
 IE  = (β + 1)·IB
 VE  = IE·RE
 VB  = VE + VBE
 VC  = VCC − IC·RC
 VCE = VC − VE</pre>
-    {% endif %}
-    <p>VCE(sat) = {{ vce_sat }} V</p>
-  </section>
-</main>
+      {% endif %}
+      <p class="hint">VCE(sat) = {{ vce_sat }} V</p>
+    </section>
+  </div>
+
+  <footer class="foot">
+    <span>ENG29 2121 · Computer Programming for Electrical Engineers</span>
+    <span>VCE(sat) = {{ vce_sat }} V</span>
+  </footer>
+</div>
 </body>
 </html>

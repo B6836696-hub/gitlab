@@ -52,6 +52,12 @@ MODE_LABELS = {
     MODE_EMITTER: "Emitter Bias",
 }
 
+MODE_SHORT_LABELS = {
+    MODE_DIVIDER: "Divider",
+    MODE_FIXED: "Fixed",
+    MODE_EMITTER: "Emitter",
+}
+
 FIELD_DEFS = {
     "vcc": ("VCC", "แรงดันไฟเลี้ยง", "V"),
     "r1": ("R1", "ตัวต้านทานฐานตัวบน", "Ω"),
@@ -88,6 +94,13 @@ def format_voltage(value_v: float) -> str:
     return f"{_trim(value_v)} V"
 
 
+def format_resistance(value_ohm: float) -> str:
+    text = f"{value_ohm:,.4f}".rstrip("0").rstrip(".")
+    if text in ("", "-0", "-"):
+        text = "0"
+    return f"{text} Ω"
+
+
 def _validate_mode(mode: str, values: dict[str, str]):
     if mode == MODE_FIXED:
         return validate_fixed_bias(values)
@@ -108,6 +121,7 @@ def create_app() -> Flask:
     app = Flask(__name__)
     app.jinja_env.filters["current"] = format_current
     app.jinja_env.filters["voltage"] = format_voltage
+    app.jinja_env.filters["resistance"] = format_resistance
 
     @app.route("/", methods=["GET", "POST"])
     def index():
@@ -153,7 +167,10 @@ def create_app() -> Flask:
             "index.html",
             mode=mode,
             mode_label=MODE_LABELS[mode],
-            mode_options=[(value, MODE_LABELS[value]) for value in MODES],
+            mode_options=[
+                (value, MODE_LABELS[value], MODE_SHORT_LABELS[value])
+                for value in MODES
+            ],
             fields=FORM_FIELDS[mode],
             values=values,
             errors=errors,
