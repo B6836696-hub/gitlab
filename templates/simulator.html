@@ -28,11 +28,11 @@
     <p class="lead">ปรับค่าอุปกรณ์และแหล่งสัญญาณ แล้วรัน .op, .ac หรือ .tran จาก Solver จริง พร้อมกราฟที่สร้างจากผลจำลอง</p>
   </section>
 
-  <form method="post" action="{{ url_for('simulator') }}" class="sim-shell" novalidate>
+  <form method="post" action="{{ url_for('simulator') }}" class="sim-shell" novalidate autocomplete="off">
     <div class="analysis-tabs" role="radiogroup" aria-label="เลือกโหมดการวิเคราะห์">
       {% for value, label, code in analysis_options %}
       <label class="analysis-tab{% if value == analysis %} on{% endif %}">
-        <input type="radio" name="analysis" value="{{ value }}"{% if value == analysis %} checked{% endif %}>
+        <input type="radio" name="analysis" value="{{ value }}" data-label="{{ label }}" data-code="{{ code }}"{% if value == analysis %} checked{% endif %}>
         <span class="at-name">{{ label }}</span>
         <span class="at-code">{{ code }}</span>
       </label>
@@ -390,5 +390,6 @@
     <span>SPICE results ≠ Analytical reference</span>
   </footer>
 </div>
+  <script src="{{ url_for('static', filename='app.js') }}" defer></script>
 </body>
 </html>

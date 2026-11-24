@@ -732,6 +732,7 @@ tbody tr:last-child td {
   border-radius: 10px;
   color: #6b7890;
   cursor: pointer;
+  transition: background 160ms ease, color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
 }
 
 .analysis-tab input {
@@ -755,6 +756,7 @@ tbody tr:last-child td {
 
 .analysis-tab:hover {
   color: #4338ca;
+  transform: translateY(-1px);
 }
 
 .analysis-tab.on {
