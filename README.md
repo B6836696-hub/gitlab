@@ -325,3 +325,75 @@ python electrical.py
 ```
 
 ป้อนแรงดัน (V) และความต้านทาน (ohm) เมื่อโปรแกรมถาม
+
+
+## Lab 04 — BJT Common-Emitter Amplifier Simulator (ngspice)
+
+ต่อยอดจาก Lab 03 โดยคง DC Bias 3 โหมดไว้ที่ `/` และเพิ่มหน้า `/simulator`
+สำหรับวงจร CE Voltage Divider อ้างอิงหนึ่งวงจร ที่รัน ngspice จริงผ่าน `subprocess`
+สำหรับ DC (`.op`), AC (`.ac`) และ Transient (`.tran`)
+
+### ความต้องการของระบบ
+
+- Python 3.10+ และ Flask 3 (ดู `requirements.txt`)
+- ngspice 4.x ที่เรียกได้จาก PATH หรือตั้งค่า environment variable `NGSPICE_BIN`
+  ชี้ไปที่โฟลเดอร์ `bin` หรือ executable โดยตรง
+- โมเดล BJT ใช้ `Q2N3904` (BF = 416.4) ที่มากับตัวอย่างของ ngspice
+
+ติดตั้ง ngspice บน Windows (ตัวอย่าง):
+
+```powershell
+[Environment]::SetEnvironmentVariable(
+    "Path",
+    $env:Path + ";C:\Users\<user>\AppData\Local\Programs\ngspice\Spice64\bin",
+    "User"
+)
+```
+
+### รัน
+
+```powershell
+py app.py
+```
+
+เปิด `http://127.0.0.1:5000/` สำหรับ DC Bias (Lab 03) และ
+`http://127.0.0.1:5000/simulator` สำหรับ Amplifier Simulator (Lab 04)
+
+### ทดสอบ
+
+```powershell
+py -m unittest discover -v
+```
+
+ชุดทดสอบครอบคลุม `bjt.py`, `app.py`, `spice_engine.py` และ `charts.py`
+โดยไม่ต้องมี ngspice สำหรับ unit tests ของ parser/netlist (แต่การรันจริงต้องมี)
+
+### โครงสร้างเพิ่มเติม
+
+```
+spice_engine.py            adapter: validate, netlist, subprocess, parse
+charts.py                  SVG Bode / Transient สร้างจากข้อมูลจริง
+templates/simulator.html   หน้าจำลอง (circuit + form + results + charts)
+tests/test_spice_engine.py parser / validation / netlist tests
+tests/test_simulator.py    route tests (mock engine)
+runs/                      ผลการรันจริงต่อรอบ (gitignored)
+```
+
+### หลักการทำงาน
+
+- `app.py` รับคำขอและ validate ค่าอินพุต → เรียก `spice_engine.run_simulation`
+- `spice_engine` สร้าง netlist ลงในโฟลเดอร์ `runs/<run-id>/` แยกกันทุกรอบ
+  แล้วรัน `ngspice -b -o run.log -r run.raw circuit.cir` (ไม่ใช้ `shell=True`)
+  พร้อม `timeout` และแยก working directory
+- ผลถูก parse จากไฟล์ raw ของ ngspice เป็นตัวเลขจริง (real และ complex)
+- ผล DC จาก ngspice ถูกเทียบกับ Analytical Reference (Lab 03) ที่ใช้ β = 416.4, VBE = 0.7 V
+  เพื่อแสดงว่ามาจากคนละแหล่ง
+- กราฟ Bode / Waveform เป็น SVG ที่สร้างจากข้อมูลที่ parse ได้จริง
+
+### ข้อควรระวัง
+
+- ถ้าไม่พบ ngspice หน้า `/simulator` จะแสดงสถานะ "ไม่พบ ngspice" และไม่คืนกราฟปลอม
+- ถ้า solver fail/timeout/output ว่าง จะแสดง error และ log จริง ไม่ค้าง Success
+- การเปลี่ยน Amplitude หรือ Frequency แล้ว Run ใหม่ จะเปลี่ยน waveform จริง
+- ค่า Cutoff Frequency จะแสดง "—" หากไม่อยู่ในช่วง sweep 10 Hz – 10 MHz
+  แทนการเดาตัวเลข

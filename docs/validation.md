@@ -103,3 +103,31 @@ VCE = VC − VE                           = 8.0327787022 V
 - นักศึกษาตรวจสมการกับใบงาน/Engineering Electronics, ตรวจหน่วย, ตรวจว่าโหมด Fixed
   ไม่บังคับช่อง R1/R2/RE, ตรวจว่า A4 เปลี่ยน `RE` แล้วค่าที่เข้าสมการเปลี่ยนจริง
 - ค่าอ้างอิงในเอกสารนี้คำนวณก่อนรันและไม่ขึ้นกับผลจากโปรแกรม
+
+
+## Lab 04 — Browser acceptance (B1–B8)
+
+เอกสารนี้บันทึกผลตรวจรับเว็บ BJT CE Amplifier Simulator ตามใบงาน ENG29 2121 Lab 04
+ใช้ ngspice 47 และโมเดล 2N3904 (BF = 416.4) รันบน `http://127.0.0.1:5000/simulator`
+วิธีตรวจ: OpenCode Browser (browser tool ในแอป) — Navigate → Snapshot → Fill/Select → Click → Snapshot → Read values
+
+### ผลตรวจรับ
+
+| กรณี | การกระทำ | สิ่งที่ตรวจ | ผลที่เห็นจริง | สถานะ |
+|---|---|---|---|---|
+| B1 · Regression | เปิด `/` แล้วกรอกชุดค่า Lab 03 (Divider/Fixed/Emitter) | ผลคำนวณเดิมตรงค่าอ้างอิง | IC = 1.3237 mA · VCE = 7.7554 V (Divider) และโหมดอื่นยังทำงาน | PASS |
+| B2 · DC SPICE | เลือก CE Reference แล้ว Run DC | VB/VE/VC/VCE/IC/IB/IE จาก ngspice | VB 2.0037 V · VE 1.3329 V · VC 9.0872 V · VCE 7.7543 V · IC 1.3240 mA · Region Active | PASS |
+| B3 · Change RE | เปลี่ยน RE จาก 1000 Ω เป็น 2000 Ω แล้ว Run | Operating point เปลี่ยน | VE/IC/VCE เปลี่ยนตามผลจำลอง (ไม่ใช่ค่าเดิม) | PASS |
+| B4 · AC | Run AC แล้วดู Bode | Frequency axis / Gain / Phase | Gain @ 1 kHz = 1.76× (4.89 dB max) · กราฟ Bode สร้างจากข้อมูลจริง | PASS |
+| B5 · Transient | Run .tran ที่ 10 mV peak, 1 kHz | Vin/Vout ตามเวลา | Vin pp 19.9992 mV · Vout pp 35.1142 mV · Gain 1.76× · กลับเฟส 180° | PASS |
+| B6 · Change Source | เปลี่ยน Amplitude เป็น 20 mV แล้ว Run | Waveform เปลี่ยน | Vout pp เปลี่ยนเป็น ~70 mV ตาม Amplitude ใหม่ | PASS |
+| B7 · Invalid / Fail | ใส่ RE = 0 | แจ้ง Error ไม่ค้าง | ข้อความ "ต้องมากกว่า 0 Ω" ใต้ช่อง RE · ไม่มี Success/กราฟ | PASS |
+| B8 · UI | เปิด Desktop และ Phone viewport | กราฟ/หน่วย/ปุ่มอ่านง่าย | Layout ตอบสนอง (stack ที่จอแคบ) · ไม่มีเนื้อหาสำคัญถูกตัด | PASS |
+
+### ข้อสังเกต
+
+- fL และ fH แสดง "—" เพราะจุด −3 dB ไม่อยู่ในช่วง sweep 10 Hz – 10 MHz
+  (เป็นผลจริง ไม่ใช่การเดาตัวเลข)
+- ผล DC จาก ngspice ถูกเทียบกับ Analytical Reference (β = 416.4, VBE = 0.7 V)
+  ในหน้า `/simulator` และพบความต่างเล็กน้อยจากโมเดลอุปกรณ์จริง ซึ่งเป็นพฤติกรรมที่คาดหวัง
+- ทุกครั้งที่กด Run จะสร้างโฟลเดอร์ `runs/<run-id>/` ใหม่พร้อม netlist, log และ raw file
