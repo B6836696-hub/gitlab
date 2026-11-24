@@ -413,3 +413,15 @@ runs/                      ผลการรันจริงต่อรอ�
 | B8 · UI | เปิด Desktop และ Phone viewport | กราฟ/หน่วย/ปุ่มอ่านง่าย | Layout ตอบสนอง · ไม่มีเนื้อหาสำคัญถูกตัด | PASS |
 
 > fL และ fH แสดง "—" เพราะจุด −3 dB ไม่อยู่ในช่วง sweep 10 Hz – 10 MHz (ผลจริง ไม่ใช่การเดาตัวเลข)
+
+
+## ลิงก์เปิดบน GitHub
+
+- Repository: https://github.com/B6836696-hub/gitlab
+- README: https://github.com/B6836696-hub/gitlab/blob/main/README.md
+- หน้า Simulator (template): https://github.com/B6836696-hub/gitlab/blob/main/templates/simulator.html
+- Engine: https://github.com/B6836696-hub/gitlab/blob/main/spice_engine.py
+- Charts: https://github.com/B6836696-hub/gitlab/blob/main/charts.py
+- Validation (B1–B8): https://github.com/B6836696-hub/gitlab/blob/main/docs/validation.md
+
+> บน GitHub ดูได้แค่โค้ด ไม่สามารถ "รัน" ได้ — ต้อง clone ลงเครื่องแล้วรัน `py app.py` (ดูขั้นตอนใน README)
