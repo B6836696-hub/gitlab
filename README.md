@@ -397,3 +397,19 @@ runs/                      ผลการรันจริงต่อรอ�
 - การเปลี่ยน Amplitude หรือ Frequency แล้ว Run ใหม่ จะเปลี่ยน waveform จริง
 - ค่า Cutoff Frequency จะแสดง "—" หากไม่อยู่ในช่วง sweep 10 Hz – 10 MHz
   แทนการเดาตัวเลข
+
+
+## Lab 04 — Browser acceptance (B1–B8)
+
+| กรณี | การกระทำ | สิ่งที่ตรวจ | ผลที่เห็นจริง | สถานะ |
+|---|---|---|---|---|
+| B1 · Regression | เปิด `/` แล้วกรอกชุดค่า Lab 03 (Divider/Fixed/Emitter) | ผลคำนวณเดิมตรงค่าอ้างอิง | IC = 1.3237 mA · VCE = 7.7554 V (Divider) และโหมดอื่นยังทำงาน | PASS |
+| B2 · DC SPICE | เลือก CE Reference แล้ว Run DC | VB/VE/VC/VCE/IC/IB/IE จาก ngspice | VB 2.0037 V · VE 1.3329 V · VC 9.0872 V · VCE 7.7543 V · IC 1.3240 mA · Active | PASS |
+| B3 · Change RE | เปลี่ยน RE จาก 1000 Ω เป็น 2000 Ω แล้ว Run | Operating point เปลี่ยน | VE/IC/VCE เปลี่ยนตามผลจำลอง | PASS |
+| B4 · AC | Run AC แล้วดู Bode | Frequency axis / Gain / Phase | Gain @ 1 kHz = 1.76× (max 4.89 dB) · กราฟจากข้อมูลจริง | PASS |
+| B5 · Transient | Run .tran ที่ 10 mV peak, 1 kHz | Vin/Vout ตามเวลา | Vin pp 19.9992 mV · Vout pp 35.1142 mV · Gain 1.76× · กลับเฟส 180° | PASS |
+| B6 · Change Source | เปลี่ยน Amplitude เป็น 20 mV แล้ว Run | Waveform เปลี่ยน | Vout pp 70.23 mV ตาม Amplitude ใหม่ | PASS |
+| B7 · Invalid / Fail | ใส่ RE = 0 | แจ้ง Error ไม่ค้าง | ข้อความ "ต้องมากกว่า 0 Ω" · ไม่มี Success/กราฟ | PASS |
+| B8 · UI | เปิด Desktop และ Phone viewport | กราฟ/หน่วย/ปุ่มอ่านง่าย | Layout ตอบสนอง · ไม่มีเนื้อหาสำคัญถูกตัด | PASS |
+
+> fL และ fH แสดง "—" เพราะจุด −3 dB ไม่อยู่ในช่วง sweep 10 Hz – 10 MHz (ผลจริง ไม่ใช่การเดาตัวเลข)
